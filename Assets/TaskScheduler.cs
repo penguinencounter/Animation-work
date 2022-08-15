@@ -1,118 +1,127 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TaskScheduler : MonoBehaviour
+namespace Assets
 {
-    public static TaskScheduler inst = null;  // for use in Start() behaviors, set this script's execution order to -1 or less (before others use it!) -thx PenguinEncounter
-    public enum TimeUnit
+    public class TaskScheduler : MonoBehaviour
     {
-        FRAMES,
-        SECONDS
-    }
-    public class Task
-    {
-        public readonly double time;
-        public readonly TimeUnit unit;
-        public readonly Action<TaskScheduler.Task> action;
-
-        public Task(double time, TimeUnit unit, Action<TaskScheduler.Task> action)
+        public static TaskScheduler Inst;  // for use in Start() behaviors, set this script's execution order to -1 or less (before others use it!) -thx PenguinEncounter
+        public enum TimeUnit
         {
-            this.time = time;
-            this.unit = unit;
-            this.action = action;
+            Frames,
+            Seconds
         }
-
-        public Task Copy()
+        public class Task
         {
-            return new Task(time, unit, action);
-        }
+            public readonly double Time;
+            public readonly TimeUnit Unit;
+            public readonly Action<Task> Action;
 
-        public Task SetTime(double newTime)
-        {
-            return new Task(newTime, unit, action);
-        }
-
-        public Task SetUnit(TimeUnit newUnit)
-        {
-            return new Task(time, newUnit, action);
-        }
-
-        public Task SetAction(Action<TaskScheduler.Task> newAction)
-        {
-            return new Task(time, unit, newAction);
-        }
-    }
-    public IList<Task> schedule = new List<Task>();
-
-    public double lastTime = -1;  // allow tasks with t=0 to run immediately
-    public int lastFrame = -1;
-
-    TaskScheduler() : base()
-    {
-        if (inst != null) Debug.LogWarning("TaskScheduler: Multiple initializations!!");
-        inst = this;  // preinit
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        if (this != inst)
-        {
-            Debug.LogError("Pre-init TaskScheduler doesn't match Start() call!!!!");
-        }
-    }
-
-    public void Future(double timeAhead, TimeUnit unit, Action<Task> action)
-    {
-        double targetTime;
-        if (unit == TimeUnit.FRAMES) targetTime = lastFrame;
-        else if (unit == TimeUnit.SECONDS) targetTime = lastTime;
-        else targetTime = 0;
-        targetTime += timeAhead;
-        schedule.Add(new Task(targetTime, unit, action));
-        Debug.Log("future: " + schedule.Count + " tasks (add, t=" + targetTime + " " + unit + ")");
-    }
-
-    public void RescheduleFuture(double timeAhead, TimeUnit unit, Task old)
-    {
-        Future(timeAhead, unit, old.action);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        int currentFrame = Time.frameCount;
-        float currentTime = Time.time;
-        Debug.Log(schedule.Count + " task(s) in queue");
-        IList<Task> toRemove = new List<Task>();
-        foreach (Task task in schedule)
-        {
-            if (task.unit == TimeUnit.FRAMES)
+            public Task(double time, TimeUnit unit, Action<Task> action)
             {
-                if (currentFrame >= task.time)
-                {
-                    task.action.Invoke(task);
-                    toRemove.Add(task);
-                }
+                Time = time;
+                Unit = unit;
+                Action = action;
             }
-            else if (task.unit == TimeUnit.SECONDS)
+
+            public Task Copy()
             {
-                if (currentTime >= task.time)
-                {
-                    task.action.Invoke(task);
-                    toRemove.Add(task);
-                }
+                return new Task(Time, Unit, Action);
+            }
+
+            public Task SetTime(double newTime)
+            {
+                return new Task(newTime, Unit, Action);
+            }
+
+            public Task SetUnit(TimeUnit newUnit)
+            {
+                return new Task(Time, newUnit, Action);
+            }
+
+            public Task SetAction(Action<Task> newAction)
+            {
+                return new Task(Time, Unit, newAction);
+            }
+        }
+        public IList<Task> Schedule = new List<Task>();
+
+        public double LastTime = -1;  // allow tasks with t=0 to run immediately
+        public int LastFrame = -1;
+
+        public TaskScheduler()
+        {
+            if (Inst != null) Debug.LogWarning("TaskScheduler: Multiple initializations!!");
+            Inst = this;  // preinit
+        }
+
+        // Start is called before the first frame update
+        private void Start()
+        {
+            if (this != Inst)
+            {
+                Debug.LogError("Pre-init TaskScheduler doesn't match Start() call!!!!");
             }
         }
 
-        foreach (Task remove in toRemove)
+        public void Future(double timeAhead, TimeUnit unit, Action<Task> action)
         {
-            schedule.Remove(remove);
+            var targetTime = unit switch
+            {
+                TimeUnit.Frames => LastFrame,
+                TimeUnit.Seconds => LastTime,
+                _ => 0
+            };
+            targetTime += timeAhead;
+            Schedule.Add(new Task(targetTime, unit, action));
         }
 
-        lastFrame = currentFrame;
-        lastTime = currentTime;
+        public void RescheduleFuture(double timeAhead, TimeUnit unit, Task old)
+        {
+            Future(timeAhead, unit, old.Action);
+        }
+
+        // Update is called once per frame
+        private void Update()
+        {
+            var currentFrame = Time.frameCount;
+            var currentTime = Time.time;
+            IList<Task> toRemove = new List<Task>();
+            foreach (var task in new List<Task>(Schedule))
+            {
+                switch (task.Unit)
+                {
+                    case TimeUnit.Frames:
+                    {
+                        if (currentFrame >= task.Time)
+                        {
+                            task.Action.Invoke(task);
+                            toRemove.Add(task);
+                        }
+
+                        break;
+                    }
+                    case TimeUnit.Seconds:
+                    {
+                        if (currentTime >= task.Time)
+                        {
+                            task.Action.Invoke(task);
+                            toRemove.Add(task);
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            foreach (var remove in toRemove)
+            {
+                Schedule.Remove(remove);
+            }
+
+            LastFrame = currentFrame;
+            LastTime = currentTime;
+        }
     }
 }

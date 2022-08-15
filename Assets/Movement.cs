@@ -1,25 +1,26 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Movement : MonoBehaviour
+namespace Assets
 {
-    // Start is called before the first frame update
-    void Start()
+    public class Movement : MonoBehaviour
     {
-        Debug.Log(TaskScheduler.inst == null ? "oh no!" : "ok we good");
-        static void testTask(TaskScheduler.Task that)
+        // Start is called before the first frame update
+        private void Start()
         {
-            Debug.Log("tick" + that.time);
-            TaskScheduler.inst.RescheduleFuture(0.1, TaskScheduler.TimeUnit.SECONDS, that);
-        }
-        TaskScheduler.inst.Future(1, TaskScheduler.TimeUnit.SECONDS, testTask);
-    }
+            Debug.Log(TaskScheduler.Inst == null ? "oh no!" : "Task scheduler exists");
+            void TestTask(TaskScheduler.Task that)
+            {
+                transform.Translate(0, -0.01f, 0);
+                TaskScheduler.Inst.RescheduleFuture(2, TaskScheduler.TimeUnit.Frames, that);
+            }
 
-    // Update is called once per frame
-    void Update()
-    {
+            if (TaskScheduler.Inst != null) TaskScheduler.Inst.Future(1, TaskScheduler.TimeUnit.Seconds, TestTask);
+        }
+
+        // Update is called once per frame
+        private void Update()
+        {
         
+        }
     }
 }

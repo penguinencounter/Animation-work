@@ -1,26 +1,29 @@
+using TMPro;
 using UnityEngine;
 
-namespace Assets
+public class Movement : MonoBehaviour
 {
-    public class Movement : MonoBehaviour
+    private bool _go;
+    private bool _collided;
+
+    private Rigidbody2D _rigidbody2D;
+
+    // Start is called before the first frame update
+    private void Start()
     {
-        // Start is called before the first frame update
-        private void Start()
+        _rigidbody2D = gameObject.GetComponent<Rigidbody2D>();
+        _rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
+        Debug.Log(TaskScheduler.Inst == null ? "oh no!" : "Task scheduler exists");
+        TaskScheduler.Inst.Future(2, TaskScheduler.TimeUnit.Seconds, _ =>
         {
-            Debug.Log(TaskScheduler.Inst == null ? "oh no!" : "Task scheduler exists");
-            void TestTask(TaskScheduler.Task that)
-            {
-                transform.Translate(0, -0.01f, 0);
-                TaskScheduler.Inst.RescheduleFuture(2, TaskScheduler.TimeUnit.Frames, that);
-            }
+            Debug.Log("Started!");
+            _rigidbody2D.constraints = RigidbodyConstraints2D.None;
+            _rigidbody2D.AddForce(Vector2.zero);
+        });
+    }
 
-            if (TaskScheduler.Inst != null) TaskScheduler.Inst.Future(1, TaskScheduler.TimeUnit.Seconds, TestTask);
-        }
-
-        // Update is called once per frame
-        private void Update()
-        {
-        
-        }
+    // Update is called once per frame
+    private void Update()
+    {
     }
 }

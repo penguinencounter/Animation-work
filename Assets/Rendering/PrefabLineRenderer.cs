@@ -65,6 +65,7 @@ namespace Rendering
             if (!_containerObject)
             {
                 _containerObject = Object.Instantiate(_prefab);
+                // This only happens *once*.
                 var containerData = _containerObject.GetComponent<LinePrefabContainer>();
                 _body = containerData.body;
                 _end1 = containerData.end1;

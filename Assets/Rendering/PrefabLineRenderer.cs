@@ -25,6 +25,8 @@ namespace Rendering
 
         private readonly int updateTicksPerSecond;
 
+        private float dt;
+
         public PrefabLineRenderer(GameObject prefab, Vector2 start, Vector2 end, 
             float strokeWidth=0.1f, float smoothness=1f, int updateTicksPerSecond=120)
         {
@@ -51,10 +53,14 @@ namespace Rendering
             _containerObject = null;
         }
     
-        public void Tick()
+        public void Tick(bool force=false)
         {
-            var dt = Time.deltaTime;
-            if (dt < 1f / updateTicksPerSecond) return; // skip calculations if we're too fast =DDD
+            dt += Time.deltaTime;
+            if (dt < 1f / updateTicksPerSecond && !force) return; // skip calculations if we're too fast =DDD
+            dt = 0;
+            
+            Debug.Log("ticking");
+            
             // lerp
             _currentStrokeWidth = Mathf.Lerp(_currentStrokeWidth, TargetStrokeWidth, Smoothness);
             _currentStart = Vector2.Lerp(_currentStart, TargetStart, Smoothness);
@@ -104,6 +110,7 @@ namespace Rendering
             _currentStart = TargetStart;
             _currentEnd = TargetEnd;
             _currentStrokeWidth = TargetStrokeWidth;
+            Tick(true);
         }
     }
 }

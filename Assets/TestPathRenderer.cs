@@ -30,9 +30,9 @@ public class TestPathRenderer : MonoBehaviour
         _seg = new PathSegment(_point1, _anchor1A, _point2);
         _seg2 = new PathSegment(_point2, _anchor2A, _point3);
         var lines1 = PathSegment.GeneratePrefabs(_seg.GenerateSegments(20), LinePrefab,
-            0.1f, 0.01f);
+            0.1f, 0.1f);
         var lines2 = PathSegment.GeneratePrefabs(_seg2.GenerateSegments(20), LinePrefab,
-            0.1f, 0.01f);
+            0.1f, 0.1f);
         _rend = new BatchLineRenderer(lines1);
         _rend2 = new BatchLineRenderer(lines2);
         
@@ -43,8 +43,8 @@ public class TestPathRenderer : MonoBehaviour
     {
         _seg.handle = _state?_anchor1A:_anchor1B;
         _seg2.handle = _state?_anchor2A:_anchor2B;
-        var lines1 = PathSegment.GeneratePrefabs(_seg.GenerateSegments(20), LinePrefab);
-        var lines2 = PathSegment.GeneratePrefabs(_seg2.GenerateSegments(20), LinePrefab);
+        var lines1 = PathSegment.GeneratePrefabs(_seg.GenerateSegments(20), LinePrefab, 0.1f, 0.1f);
+        var lines2 = PathSegment.GeneratePrefabs(_seg2.GenerateSegments(20), LinePrefab, 0.1f, 0.1f);
         
         _rend.UpdateExisting(lines1);
         _rend2.UpdateExisting(lines2);

@@ -23,8 +23,10 @@ namespace Rendering
         private GameObject _end1;
         private GameObject _end2;
 
+        private readonly int updateTicksPerSecond;
+
         public PrefabLineRenderer(GameObject prefab, Vector2 start, Vector2 end, 
-            float strokeWidth=0.1f, float smoothness=1f)
+            float strokeWidth=0.1f, float smoothness=1f, int updateTicksPerSecond=120)
         {
             _prefab = prefab;
             Smoothness = smoothness;
@@ -38,6 +40,8 @@ namespace Rendering
             _currentEnd = end;
             TargetEnd = end;
 
+            this.updateTicksPerSecond = updateTicksPerSecond;
+
             Tick();
         }
 
@@ -49,6 +53,8 @@ namespace Rendering
     
         public void Tick()
         {
+            var dt = Time.deltaTime;
+            if (dt < 1f / updateTicksPerSecond) return; // skip calculations if we're too fast =DDD
             // lerp
             _currentStrokeWidth = Mathf.Lerp(_currentStrokeWidth, TargetStrokeWidth, Smoothness);
             _currentStart = Vector2.Lerp(_currentStart, TargetStart, Smoothness);

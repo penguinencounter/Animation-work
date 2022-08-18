@@ -33,5 +33,24 @@ namespace Rendering
                 action(renderer);
             }
         }
+
+        public void UpdateExisting(IEnumerable<PrefabLineRenderer> lines2)
+        {
+            var i = 0;
+            foreach (var line in lines2)
+            {
+                var existing = Renderers[i];
+                if (existing != null)
+                {
+                    existing.Smoothness = line.Smoothness;
+                    existing.TargetEnd = line.TargetEnd;
+                    existing.TargetStart = line.TargetStart;
+                    existing.TargetStrokeWidth = line.TargetStrokeWidth;
+                }
+
+                line.Destroy();
+                i++;
+            }
+        }
     }
 }

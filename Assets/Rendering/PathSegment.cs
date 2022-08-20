@@ -9,23 +9,38 @@ namespace Rendering
     public class PathSegment
     {
         public Vector2 start;
+        public bool hasHandle;
         public Vector2 handle;
         public Vector2 end;
 
-        public PathSegment(Vector2 start, Vector2 handle, Vector2 end)
+        public PathSegment(Vector2 start, Vector2 end, bool hasHandle = false, Vector2 handle = default)
         {
             this.start = start;
+            this.hasHandle = hasHandle;
             this.handle = handle;
+            this.end = end;
+        }
+
+        public PathSegment(Vector2 start, Vector2 end)
+        {
+            this.start = start;
+            hasHandle = false;
+            handle = new Vector2(0, 0);
             this.end = end;
         }
 
         public static PathSegment Line(Vector2 start, Vector2 end)
         {
-            return new PathSegment(start, Vector2.Lerp(start, end, 0.5f), end);
+            return new PathSegment(start, end);
         }
 
         public IList<PathSegment> GenerateSegments(int segments)
         {
+            if (!hasHandle)
+            {
+                return new[] {this};
+            }
+
             var result1 = new List<PathSegment>();
             var result2 = new List<PathSegment>();
             for (var i = 0; i < segments; i++)
@@ -35,13 +50,13 @@ namespace Rendering
                 var linePoint2 = Vector2.Lerp(handle, end, t);
                 result1.Add(Line(linePoint1, linePoint2));
             }
-            
+
             // trim down lines to only relevant parts of the curve
             for (var i = 0; i < result1.Count; i++)
             {
-                var previous = i == 0?null:result1[i - 1];
+                var previous = i == 0 ? null : result1[i - 1];
                 var current = result1[i];
-                var next = i == result1.Count - 1?null:result1[i + 1];
+                var next = i == result1.Count - 1 ? null : result1[i + 1];
                 var current1 = current.start;
                 var current2 = current.end;
 
@@ -50,8 +65,9 @@ namespace Rendering
                     // determine point of intersection from endpoint pairs
                     var previous1 = previous.start;
                     var previous2 = previous.end;
-                    
-                    if (LineUtil.IntersectLineSegments2D(previous1, previous2, current1, current2, out var intersection))
+
+                    if (LineUtil.IntersectLineSegments2D(previous1, previous2, current1, current2,
+                            out var intersection))
                     {
                         current1 = intersection;
                     }
@@ -68,8 +84,10 @@ namespace Rendering
                         current2 = intersection;
                     }
                 }
+
                 result2.Add(Line(current1, current2));
             }
+
             return result2;
         }
 

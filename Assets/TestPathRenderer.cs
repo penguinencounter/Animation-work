@@ -27,8 +27,8 @@ public class TestPathRenderer : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
-        _seg = new PathSegment(_point1, _anchor1A, _point2);
-        _seg2 = new PathSegment(_point2, _anchor2A, _point3);
+        _seg = new PathSegment(_point1, _point2, true, _anchor1A);
+        _seg2 = new PathSegment(_point2, _point3, true, _anchor2A);
         var lines1 = PathSegment.GeneratePrefabs(_seg.GenerateSegments(20), LinePrefab,
             0.1f, 0.1f);
         var lines2 = PathSegment.GeneratePrefabs(_seg2.GenerateSegments(20), LinePrefab,

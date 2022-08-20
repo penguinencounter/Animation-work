@@ -1,5 +1,4 @@
-﻿using System;
-using Containers;
+﻿using Containers;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -25,9 +24,9 @@ namespace Rendering
         private GameObject _end1;
         private GameObject _end2;
 
-        private readonly int updateTicksPerSecond;
+        private readonly int _updateTicksPerSecond;
 
-        private float dt;
+        private float _dt;
 
         public PrefabLineRenderer(GameObject prefab, Vector2 start, Vector2 end, 
             float strokeWidth=0.1f, float smoothness=1f, int updateTicksPerSecond=120)
@@ -44,7 +43,7 @@ namespace Rendering
             _currentEnd = end;
             TargetEnd = end;
 
-            this.updateTicksPerSecond = updateTicksPerSecond;
+            this._updateTicksPerSecond = updateTicksPerSecond;
 
             Tick();
         }
@@ -57,11 +56,11 @@ namespace Rendering
 
         public void Tick(bool force = false)
         {
-            dt += Time.deltaTime;
-            var secondsPerTick = 1f / updateTicksPerSecond;
+            _dt += Time.deltaTime;
+            var secondsPerTick = 1f / _updateTicksPerSecond;
             for (var iterCount = 0; iterCount < 10; iterCount++)
             {
-                var iterations = (int) (dt / secondsPerTick);
+                var iterations = (int) (_dt / secondsPerTick);
                 if (!force && iterations == 0) return;
 
                 // lerp
@@ -97,13 +96,13 @@ namespace Rendering
 
                 end1.localScale = new Vector2(_currentStrokeWidth, _currentStrokeWidth);
                 end2.localScale = new Vector2(_currentStrokeWidth, _currentStrokeWidth);
-                dt -= secondsPerTick;
-                dt = Mathf.Max(dt, 0);
+                _dt -= secondsPerTick;
+                _dt = Mathf.Max(_dt, 0);
                 if (iterations <= 1) return;
                 force = true;
             }
             Debug.LogWarning("Dropping frames!");
-            dt = 0;
+            _dt = 0;
         }
 
         public void SetPoints(Vector2 newStart, Vector2 newEnd)

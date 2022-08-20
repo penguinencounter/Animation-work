@@ -1,4 +1,3 @@
-using TMPro;
 using UnityEngine;
 
 public class Movement : MonoBehaviour
@@ -20,10 +19,5 @@ public class Movement : MonoBehaviour
             _rigidbody2D.constraints = RigidbodyConstraints2D.None;
             _rigidbody2D.AddForce(Vector2.zero);
         });
-    }
-
-    // Update is called once per frame
-    private void Update()
-    {
     }
 }

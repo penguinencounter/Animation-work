@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Rendering;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -15,7 +12,7 @@ public class TestPathRenderer : MonoBehaviour
     private Vector2 _anchor2A = new(2.5f, -2.5f);
     private Vector2 _anchor2B = new(2.5f, 2.5f);
 
-    public GameObject LinePrefab;
+    [FormerlySerializedAs("LinePrefab")] public GameObject linePrefab;
 
     private bool _state;
 
@@ -29,9 +26,9 @@ public class TestPathRenderer : MonoBehaviour
     {
         _seg = new PathSegment(_point1, _point2, true, _anchor1A);
         _seg2 = new PathSegment(_point2, _point3, true, _anchor2A);
-        var lines1 = PathSegment.GeneratePrefabs(_seg.GenerateSegments(20), LinePrefab,
+        var lines1 = PathSegment.GeneratePrefabs(_seg.GenerateSegments(20), linePrefab,
             0.1f, 0.1f);
-        var lines2 = PathSegment.GeneratePrefabs(_seg2.GenerateSegments(20), LinePrefab,
+        var lines2 = PathSegment.GeneratePrefabs(_seg2.GenerateSegments(20), linePrefab,
             0.1f, 0.1f);
         _rend = new BatchLineRenderer(lines1);
         _rend2 = new BatchLineRenderer(lines2);
@@ -43,8 +40,8 @@ public class TestPathRenderer : MonoBehaviour
     {
         _seg.handle = _state?_anchor1A:_anchor1B;
         _seg2.handle = _state?_anchor2A:_anchor2B;
-        var lines1 = PathSegment.GeneratePrefabs(_seg.GenerateSegments(20), LinePrefab, 0.1f, 0.1f);
-        var lines2 = PathSegment.GeneratePrefabs(_seg2.GenerateSegments(20), LinePrefab, 0.1f, 0.1f);
+        var lines1 = PathSegment.GeneratePrefabs(_seg.GenerateSegments(20), linePrefab, 0.1f, 0.1f);
+        var lines2 = PathSegment.GeneratePrefabs(_seg2.GenerateSegments(20), linePrefab, 0.1f, 0.1f);
         
         _rend.UpdateExisting(lines1);
         _rend2.UpdateExisting(lines2);

@@ -1,5 +1,7 @@
-﻿using Containers;
+﻿using System;
+using Containers;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Rendering
 {
@@ -52,51 +54,56 @@ namespace Rendering
             Object.Destroy(_containerObject);
             _containerObject = null;
         }
-    
-        public void Tick(bool force=false)
+
+        public void Tick(bool force = false)
         {
             dt += Time.deltaTime;
-            if (dt < 1f / updateTicksPerSecond && !force) return; // skip calculations if we're too fast =DDD
-            dt = 0;
-            
-            Debug.Log("ticking");
-            
-            // lerp
-            _currentStrokeWidth = Mathf.Lerp(_currentStrokeWidth, TargetStrokeWidth, Smoothness);
-            _currentStart = Vector2.Lerp(_currentStart, TargetStart, Smoothness);
-            _currentEnd = Vector2.Lerp(_currentEnd, TargetEnd, Smoothness);
-        
-            // calculate position, scale, rotation
-            var position = (_currentStart + _currentEnd) / 2f;
-            var scale = new Vector2(
-                Vector2.Distance(_currentStart, _currentEnd),
-                _currentStrokeWidth
-            );
-            var rotation = Quaternion.FromToRotation(Vector2.right, _currentEnd - _currentStart);
-        
-            if (!_containerObject)
+            var secondsPerTick = 1f / updateTicksPerSecond;
+            for (var iterCount = 0; iterCount < 10; iterCount++)
             {
-                _containerObject = Object.Instantiate(_prefab);
-                // This only happens *once*.
-                var containerData = _containerObject.GetComponent<LinePrefabContainer>();
-                _body = containerData.body;
-                _end1 = containerData.end1;
-                _end2 = containerData.end2;
+                var iterations = (int) (dt / secondsPerTick);
+                if (!force && iterations == 0) return;
+
+                // lerp
+                _currentStrokeWidth = Mathf.Lerp(_currentStrokeWidth, TargetStrokeWidth, Smoothness);
+                _currentStart = Vector2.Lerp(_currentStart, TargetStart, Smoothness);
+                _currentEnd = Vector2.Lerp(_currentEnd, TargetEnd, Smoothness);
+
+                // calculate position, scale, rotation
+                var position = (_currentStart + _currentEnd) / 2f;
+                var scale = new Vector2(Vector2.Distance(_currentStart, _currentEnd), _currentStrokeWidth);
+                var rotation = Quaternion.FromToRotation(Vector2.right, _currentEnd - _currentStart);
+
+                if (!_containerObject)
+                {
+                    _containerObject = Object.Instantiate(_prefab);
+                    // This only happens *once*.
+                    var containerData = _containerObject.GetComponent<LinePrefabContainer>();
+                    _body = containerData.body;
+                    _end1 = containerData.end1;
+                    _end2 = containerData.end2;
+                }
+ 
+                var t = _containerObject.transform;
+                var bt = _body.transform;
+                t.position = position;
+                t.rotation = rotation;
+                bt.localScale = scale;
+
+                var end1 = _end1.transform;
+                var end2 = _end2.transform;
+                end1.position = _currentStart;
+                end2.position = _currentEnd;
+
+                end1.localScale = new Vector2(_currentStrokeWidth, _currentStrokeWidth);
+                end2.localScale = new Vector2(_currentStrokeWidth, _currentStrokeWidth);
+                dt -= secondsPerTick;
+                dt = Mathf.Max(dt, 0);
+                if (iterations <= 1) return;
+                force = true;
             }
-
-            var t = _containerObject.transform;
-            var bt = _body.transform;
-            t.position = position;
-            t.rotation = rotation;
-            bt.localScale = scale;
-        
-            var end1 = _end1.transform;
-            var end2 = _end2.transform;
-            end1.position = _currentStart;
-            end2.position = _currentEnd;
-
-            end1.localScale = new Vector2(_currentStrokeWidth, _currentStrokeWidth);
-            end2.localScale = new Vector2(_currentStrokeWidth, _currentStrokeWidth);
+            Debug.LogWarning("Dropping frames!");
+            dt = 0;
         }
 
         public void SetPoints(Vector2 newStart, Vector2 newEnd)
